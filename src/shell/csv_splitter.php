@@ -6,7 +6,8 @@ use Keboola\Csv\CsvFile;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 
-$csv_file    = new CsvFile('sample.csv');
+// $csv_file    = new CsvFile('sample.csv');
+$csv_file    = new CsvFile($argv[1]);
 $csv_header  = $csv_file->getHeader();
 $row_count   = 0; 
 $file_count  = 1; 
