@@ -1,0 +1,16 @@
+{
+    "name": "vinicarlos56/csv_bsv_batch_process",
+    "description": "Batch processing for CSV files",
+    "authors": [
+        {
+            "name": "Carlos Vinicius",
+            "email": "vinicarlos56@hotmail.com"
+        }
+    ],
+    "require": {
+        "symfony/process": "2.4.*@dev",
+        "goodby/csv": "dev-master",
+        "symfony/filesystem": "2.5.*@dev",
+        "keboola/csv": "dev-master"
+    }
+}
