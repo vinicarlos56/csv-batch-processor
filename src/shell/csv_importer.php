@@ -6,11 +6,13 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\Process\ProcessBuilder;
 use Symfony\Component\Process\PhpProcess;
 
-ini_set('display_errors',true);
-error_reporting(E_ALL);
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Handler\FirePHPHandler;
 
-
-$log_file_name = 'teste';
+$logger = new Logger('csv_batch_importer');
+$logger->pushHandler(new StreamHandler(__DIR__.'/../../logs/report_'.date('d-m-Y h-i-s').'.log', Logger::DEBUG));
+$logger->pushHandler(new FirePHPHandler());
 
 $output_dir = __DIR__.'/../../tmp/output/';
 
@@ -21,12 +23,13 @@ $files = array_filter(scandir($output_dir),function($file_name){
 foreach ($files as $file_name) {
 
     $file_name = $output_dir.$file_name;
-    $process = new ProcessBuilder(array('/usr/bin/php',__DIR__.'/csv_process.php', $file_name));
-    $process->getProcess()->run(function ($type, $buffer) {
+    $process_builder = new ProcessBuilder(array('/usr/bin/php',__DIR__.'/csv_process.php', $file_name));
+    $process_builder->setTimeout(0);
+    $process_builder->getProcess()->run(function ($type, $buffer) use($logger) {
         if (Process::ERR === $type) {
-            echo $buffer.PHP_EOL;
+            $logger->addError($buffer);
         } else {
-            echo $buffer.PHP_EOL;
+            $logger->addInfo($buffer);
         }
     });
 

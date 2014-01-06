@@ -11,7 +11,7 @@ $csv_file    = new CsvFile($argv[1]);
 $csv_header  = $csv_file->getHeader();
 $row_count   = 0; 
 $file_count  = 1; 
-$split_size  = 5; 
+$split_size  = 500; 
 $output_rows = array();
 $output_dir  = 'tmp/output/'; 
 
