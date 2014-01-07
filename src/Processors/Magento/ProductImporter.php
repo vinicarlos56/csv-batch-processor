@@ -49,45 +49,35 @@ class ProductImporter implements BatchProcessorInterface
 
     public function createProduct($productData)
     {
-            // $product_data['name'] 	  	       = $name;
-            // $product_data['short_description'] = $short_description;
-            // $product_data['sku'] 	  	       = $sku;
-            // $product_data['status']   	       = $status;
-            // $product_data['type_id'] 	       = 'simple';
-            // $product_data['visibility'] 	   = 1; // catalog, search
-            // $product_data['weight']     	   = $weight;
-            // $product_data['price'] 		       = $price;
-            // $product_data['color']      	   = $color;
-            // $product_data['tamanho']  	       = $tamanho;
-            // $product_data['colecao']  	       = $colecao;
-            // $product_data['description'] 	   = $description;
-            // $product_data['referencia'] 	   = $referencia;
-            // $product_data['attribute_set_id']  = 4;  // default attribute set
-            // $product_data['website_ids']       = array(1); //main website
-            // 
-            // $stock_data['qty'] 		           = $qty;
-            // $stock_data['min_qty']  	       = 0;
-            // $stock_data['is_in_stock'] 	       = 1; 
-            // $stock_data['manage_stock'] 	   = 1; 
-            // $stock_data['stock_id'] 	       = 1; 
-            // $stock_data['use_config_manage_stock'] = 0;
+	    $mage = $this->magentoInstance;
 
-            // $product_model 	 = $mage::getModel('catalog/product');
-            // $product_model->setData(array_merge($product_model->getData(),$product_data));
-            // $product_model->save();
+	    $productData['type_id'] 	      = 'simple';
+            $productData['visibility']        = 1; // catalog, search
+	    $productData['attribute_set_id']  = 4;  // default attribute set
+            $productData['website_ids']       = array(1); //main website
 
-            // $stock_model = $mage::getModel('cataloginventory/stock_item');
-            // $stock_model->assignProduct($product_model);
-            // $stock_model->setData(array_merge($stock_model->getData(),$stock_data));
-            // $stock_model->save();
+	    $stockData['qty']		       = $productData['qty'];
+            $stockData['min_qty']  	       = 0;
+            $stockData['is_in_stock'] 	       = ((int) $productData['qty']) ? 1 : 0; 
+            $stockData['manage_stock']         = 1; 
+            $stockData['stock_id'] 	       = 1; 
+            $stockData['use_config_manage_stock'] = 0;
 
-            // $product_model->clearInstance();
-            // $product_model->getOptionInstance()->unsetOptions()->clearInstance();
-            // $stock_model->clearInstance();
+            $productModel = $mage::getModel('catalog/product');
+            $productModel->setData(array_merge($productModel->getData(),$productData));
+            $productModel->save();
+
+            $stockModel = $mage::getModel('cataloginventory/stock_item');
+            $stockModel->assignProduct($productModel);
+            $stockModel->setData(array_merge($stockModel->getData(),$stockData));
+            $stockModel->save();
+
+            $productModel->clearInstance();
+            $productModel->getOptionInstance()->unsetOptions()->clearInstance();
+            $stockModel->clearInstance();
 
             echo "Product Created ".$productData['sku'] ;
 
-        // code...
     }
 
     public function setCsvHeader($header)
@@ -108,6 +98,8 @@ class ProductImporter implements BatchProcessorInterface
 
         foreach ( $file as $row ) {
 
+	    if( $row == $this->csvHeader ) continue;
+
             $row     = $this->buildAssoc($row);
             $product = $mage::getModel('catalog/product')->loadByAttribute('sku',$row['sku']); 
 
@@ -120,13 +112,11 @@ class ProductImporter implements BatchProcessorInterface
                 $this->createProduct($row);
             }
 
-            gc_collect_cycles();
+            // gc_collect_cycles();
 
         }
 
         echo "End of file: ".basename($file_name." ");
-
-        // fclose($file);
 
     }
 

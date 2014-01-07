@@ -12,7 +12,8 @@
         "goodby/csv": "dev-master",
         "symfony/filesystem": "2.5.*@dev",
         "keboola/csv": "dev-master",
-        "monolog/monolog": "1.7.*@dev"
+        "monolog/monolog": "1.7.*@dev",
+	"slim/slim": "2.*"
     },
     "autoload": {
         "psr-0": {
