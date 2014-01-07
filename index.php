@@ -33,11 +33,9 @@ $app->get('/', function () {
 	    __DIR__.'/tmp/output/',
 	)
     );
-    $process->getProcess()->start();
-    // echo $command = '/usr/bin/php '.__DIR__.'/src/shell/csv_importer.php '.__DIR__.'/tmp/output/  > /dev/null 2>&1 &';
-    // exec($command);
 
-    // echo 'Process is running';
+    $process->getProcess()->start();
+
     // $splitter->clearOutputFiles();
 
 });
