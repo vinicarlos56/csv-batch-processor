@@ -20,22 +20,42 @@ use Slim\Slim;
 
 $app = new Slim(array(
     'mode'=>'development',
+    'templates.path' => './templates/'
 ));
-$app->get('/', function () {
+$app->get('/', function () use ($app){
     
-    $splitter = new CsvSplitter(new CsvFile(__DIR__.'/sample.csv'),__DIR__.'/tmp/output/');
-    $splitter->split(20);
+     $app->render('page.php',array());
+
+});
+
+$app->get('/download_report', function () use ($app){
+    
+    $fileName = $app->request()->params('filename');
+
+    echo "<pre>";
+    echo file_get_contents('logs/'.$fileName);
+
+
+
+});
+$app->get('/process/', function () use ($app){
+
+    $fileName = $app->request()->params('filename');
+    
+    $splitter = new CsvSplitter(new CsvFile($fileName),__DIR__.'/tmp/output/');
+    $splitter->split(100);
 
     $process = new ProcessBuilder(
-	array(
-	    '/usr/bin/php',
-	    __DIR__.'/src/shell/csv_importer.php',
-	    __DIR__.'/tmp/output/',
-	)
+        array(
+            '/usr/bin/php',
+            __DIR__.'/src/shell/csv_importer.php',
+            __DIR__.'/tmp/output/',
+        )
     );
 
     $process->getProcess()->start();
 
+    $app->redirect('/csv_batch_process/index.php');
     // $splitter->clearOutputFiles();
 
 });
