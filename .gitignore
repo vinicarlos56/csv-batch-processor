@@ -1,5 +1,3 @@
 /vendor/
-/tmp/*
-/logs/*
 *.swp
 *.swo
