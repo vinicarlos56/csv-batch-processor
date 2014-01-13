@@ -8,12 +8,15 @@
         }
     ],
     "require": {
-        "symfony/process": "2.4.*@dev",
-        "goodby/csv": "dev-master",
-        "symfony/filesystem": "2.5.*@dev",
-        "keboola/csv": "dev-master",
-        "monolog/monolog": "1.7.*@dev",
-	"slim/slim": "2.*"
+        "symfony/process": "v2.4.1",
+        "symfony/filesystem": "v2.4.1",
+        "goodby/csv": "1.1.0",
+        "keboola/csv": "1.1.2",
+        "monolog/monolog": "1.7.0",
+	"slim/slim": "2.4.0",
+	"phpunit/phpunit": "3.7.28",
+	"codeception/codeception": "1.7.4",
+	"mockery/mockery": "0.8.0"
     },
     "autoload": {
         "psr-0": {
