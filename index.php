@@ -4,9 +4,10 @@ ini_set('display_errors',true);
 error_reporting(E_ALL);
 
 require_once __DIR__.'/vendor/autoload.php'; // load composer
-require_once "/home/carlos/www/magento/app/Mage.php";
+require_once __DIR__."/../app/Mage.php";
 
 use Symfony\Component\Process\ProcessBuilder;
+use Symfony\Component\Process\Process;
 use Helpers\CSV\CsvSplitter;
 use Keboola\Csv\CsvFile;
 use Slim\Slim;
@@ -45,18 +46,14 @@ $app->get('/process/', function () use ($app){
     $splitter = new CsvSplitter(new CsvFile($fileName),__DIR__.'/tmp/output/');
     $splitter->split(100);
 
-    $process = new ProcessBuilder(
-        array(
-            '/usr/bin/php',
-            __DIR__.'/src/shell/csv_importer.php',
-            __DIR__.'/tmp/output/',
-        )
+    $process = new Process(
+            '/usr/bin/nohup /usr/local/bin/php '.
+            __DIR__.'/src/shell/csv_importer.php '.
+            __DIR__.'/tmp/output/  > /dev/null 2>&1 &', '/tmp'
     );
 
-    $process->getProcess()->start();
-
+    $process->run();
     $app->redirect('/csv_batch_process/index.php');
-    // $splitter->clearOutputFiles();
 
 });
 $app->run();

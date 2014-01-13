@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__.'/../../vendor/autoload.php'; // load composer
-require_once "/home/carlos/www/magento/app/Mage.php";
+require_once __DIR__."/../../../app/Mage.php";
 
 use Processors\Magento\ProductImporter;
 use Keboola\Csv\CsvFile;

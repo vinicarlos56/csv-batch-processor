@@ -49,14 +49,14 @@ class ProductImporter implements BatchProcessorInterface
 
     public function createProduct($productData)
     {
-	    $mage = $this->magentoInstance;
+            $mage = $this->magentoInstance;
 
-	    $productData['type_id'] 	      = 'simple';
+            $productData['type_id'] 	      = 'simple';
             $productData['visibility']        = 1; // catalog, search
-	    $productData['attribute_set_id']  = 4;  // default attribute set
+            $productData['attribute_set_id']  = 4;  // default attribute set
             $productData['website_ids']       = array(1); //main website
 
-	    $stockData['qty']		       = $productData['qty'];
+            $stockData['qty']		       = $productData['qty'];
             $stockData['min_qty']  	       = 0;
             $stockData['is_in_stock'] 	       = ((int) $productData['qty']) ? 1 : 0; 
             $stockData['manage_stock']         = 1; 
