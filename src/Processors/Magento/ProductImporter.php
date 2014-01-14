@@ -109,7 +109,7 @@ class ProductImporter implements BatchProcessorInterface
 
             } else {
 
-                $this->createProduct($row);
+                // $this->createProduct($row);
             }
 
             // gc_collect_cycles();
