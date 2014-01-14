@@ -90,7 +90,7 @@ class ProductImporter implements BatchProcessorInterface
        return array_combine($this->csvHeader,$row); 
     }
 
-    public function process(CsvFile $file)
+    public function process(CsvFile $file,$file_name)
     {
        
         $this->setCsvHeader($file->getHeader());
@@ -116,7 +116,7 @@ class ProductImporter implements BatchProcessorInterface
 
         }
 
-        echo "End of file: ".basename($file_name." ");
+        echo "End of file: ".$file_name;
 
     }
 

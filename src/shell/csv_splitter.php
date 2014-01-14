@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__.'/../../vendor/autoload.php'; // load composer
+require_once __DIR__.'/../config/config.php';
 
 
 use Helpers\CSV\CsvSplitter;

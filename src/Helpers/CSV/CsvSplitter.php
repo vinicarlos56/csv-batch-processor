@@ -19,8 +19,8 @@ class CsvSplitter
 
     public function clearOutputFiles()
     {
-	$fs = new Filesystem;
-	$fs->remove($this->outputDir);
+	// $fs = new Filesystem;
+	// $fs->remove($this->outputDir);
     }
 
     public function split($splitSize,$outputName = 'output')
@@ -31,6 +31,7 @@ class CsvSplitter
 
 	$fs = new Filesystem;
 
+    //TODO: fix mkdir
 	if ( ! $fs->exists($this->outputDir) ) $fs->mkdir($this->outputDir);
 
 	foreach($this->file as $row) {

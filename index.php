@@ -3,57 +3,64 @@
 ini_set('display_errors',true);
 error_reporting(E_ALL);
 
-require_once __DIR__.'/vendor/autoload.php'; // load composer
-require_once __DIR__."/../app/Mage.php";
+include __DIR__.'/src/config/config.php';
+
+require_once $config['magento_full_path'];
 
 use Symfony\Component\Process\ProcessBuilder;
 use Symfony\Component\Process\Process;
 use Helpers\CSV\CsvSplitter;
+use Helpers\ProcessLocker;
 use Keboola\Csv\CsvFile;
 use Slim\Slim;
 
 
-// load the main file HttpGet
-// split the file in chunks Splitter
-// process each file Impoter > Process
-// clear the files Splitter
-
-
 $app = new Slim(array(
     'mode'=>'development',
-    'templates.path' => './templates/'
+    'templates.path' => $config['templates_path']
 ));
-$app->get('/', function () use ($app){
+
+$app->get('/', function () use ($app,$config){
+
     
-     $app->render('page.php',array());
+    
+    $app->render('page.php',array(
+        'csv_files_path'=> $config['csv_files_path'],
+        'log_files_path'=> $config['log_files_path'],
+    ));
 
 });
 
-$app->get('/download_report', function () use ($app){
+$app->get('/download_report', function () use ($app,$config){
     
     $fileName = $app->request()->params('filename');
 
     echo "<pre>";
-    echo file_get_contents('logs/'.$fileName);
+    echo file_get_contents($config['log_files_path'].$fileName);
 
 
 
 });
-$app->get('/process/', function () use ($app){
+
+$app->get('/process/', function () use ($app,$config){
 
     $fileName = $app->request()->params('filename');
-    
-    $splitter = new CsvSplitter(new CsvFile($fileName),__DIR__.'/tmp/output/');
-    $splitter->split(100);
 
-    $process = new Process(
-            '/usr/bin/nohup /usr/local/bin/php '.
-            __DIR__.'/src/shell/csv_importer.php '.
-            __DIR__.'/tmp/output/  > /dev/null 2>&1 &', '/tmp'
-    );
+    $locker = new ProcessLocker($config['lock_file']);
 
-    $process->run();
+    if ( ! $locker->isLocked() ) {
+
+        $splitter = new CsvSplitter(new CsvFile($fileName),$config['output_csv_path']);
+        $splitter->split($config['split_size']);
+
+        $command = $config['nohup_path'].' '.$config['php_path'].' '.__DIR__.'/src/shell/csv_importer.php '.$config['output_csv_path'].'  > /dev/null 2>&1 &';
+        $process = new Process($command,$config['proc_working_path']);
+
+        $process->run();
+    }
+
     $app->redirect('/csv_batch_process/index.php');
 
 });
+
 $app->run();

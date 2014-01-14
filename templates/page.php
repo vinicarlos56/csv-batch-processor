@@ -7,8 +7,7 @@
 
 <?php
 
-$full_path = '/home/carlos/Downloads/';
-if ($handle = opendir($full_path)) {
+if ($handle = opendir($csv_files_path)) {
 
     $files = array();
 
@@ -22,7 +21,7 @@ if ($handle = opendir($full_path)) {
     closedir($handle);
 }
 
-if ($handle = opendir(__DIR__.'/../logs/')) {
+if ($handle = opendir($log_files_path)) {
 
     $reports = array();
 
@@ -43,8 +42,9 @@ if ($handle = opendir(__DIR__.'/../logs/')) {
 <label>Selecione o arquivo:</label>
 
 <select name="filename">
+
 <?php foreach ($files as $file): ?>
-    <option value="<?=$full_path.$file?>"><?=$file?></option>
+    <option value="<?=$csv_files_path.$file?>"><?=$file?></option>
 <?php endforeach; ?>
 </select>
 
