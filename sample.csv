@@ -1,6 +1,6 @@
 "sku","referencia","name","description","short_description","cod_cor","color","cod_tamanho","tamanho","qty","price","special_price","colecao","visibility","is_in_stock","type","attribute_set","product_website","status","weight"
-"100021411","10.003.767","GOLA NEVASCA T REF: 10.003.767 (AZUL COLLEGE UN)","GOLA NEVASCA T",,"0283","AZUL COLLEGE","1","UN","6","119.70","36.00","32013","1","1","simple","Default","base","1","0.3"
-"100021412","10.003.767","GOLA NEVASCA T REF: 10.003.767 (VERDE PROFUNDO UN)","GOLA NEVASCA T",,"0584","VERDE PROFUNDO","1","UN","6","119.70","36.00","32013","1","1","simple","Default","base","1","0.3"
+"100021411","10.003.767","GOLA NEVASCA T REF: 10.003.767 (AZUL COLLEGE UN)","GOLA NEVASCA T",,"0283","AZUL COLLEGE","1","UN","20","119.70","36.00","32013","1","1","simple","Default","base","1","0.3"
+"100021412","10.003.767","GOLA NEVASCA T REF: 10.003.767 (VERDE PROFUNDO UN)","GOLA NEVASCA T",,"0584","VERDE PROFUNDO","1","UN","2","119.70","36.00","32013","1","1","simple","Default","base","1","0.3"
 "100025121","10.004.302","SHORT SOFIA M REF: 10.004.302 (GRAPE 42)","SHORT SOFIA M",,"0757","GRAPE","4","42","6","259.80","69.00","12013","1","1","simple","Default","base","1","0.3"
 "100028785","10.004.939","VESTIDO PONTILHADO B REF: 10.004.939 (AZUL RIVIERA G)","VESTIDO PONTILHADO B",,"0249","AZUL RIVIERA","3","G","6","329.70","329.70","12014","1","1","simple","Default","base","1","0.3"
 "100024338","10.004.171","CASACO AMORA M REF: 10.004.171 (SMILE 42)","CASACO AMORA M",,"1304","SMILE","4","42","6","399.60","79.00","12013","1","1","simple","Default","base","1","0.3"
@@ -18,3 +18,5 @@
 "100039352","10.006.611","CHEMISE CHANTILLY F REF: 10.006.611 (PRETO 36)","CHEMISE CHANTILLY F",,"1000","PRETO","1","36","6","279.90","279.90","12014","1","1","simple","Default","base","1","0.3"
 "100034836","10.005.795","VESTIDO ELLUS   M REF: 10.005.795 (PEROLA 40)","VESTIDO ELLUS   M",,"0451","PEROLA","3","40","6","459.60","459.60","12014","1","1","simple","Default","base","1","0.3"
 "100034837","10.005.795","VESTIDO ELLUS   M REF: 10.005.795 (PEROLA 42)","VESTIDO ELLUS   M",,"0451","PEROLA","4","42","6","459.60","459.60","12014","1","1","simple","Default","base","1","0.3"
+"Teste","10.005.795","VESTIDO ELLUS   M REF: 10.005.795 (PEROLA 42)","VESTIDO ELLUS   M",,"0451","PEROLA","4","42","6","459.60","459.60","12014","1","1","simple","Default","base","1","0.3"
+

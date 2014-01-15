@@ -21,7 +21,8 @@
     "autoload": {
         "psr-0": {
             "Processors": "src/",
-            "Helpers": "src/"
+            "Helpers": "src/",
+            "Repositories": "src/"
         }
     }
 }

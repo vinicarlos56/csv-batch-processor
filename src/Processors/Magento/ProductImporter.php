@@ -3,78 +3,60 @@
 namespace Processors\Magento;
 
 use Processors\BatchProcessorInterface;
+use Repositories\Magento\CatalogRepository;
+use Helpers\Magento\AttributeManager;
 use Keboola\Csv\CsvFile;
 
 class ProductImporter implements BatchProcessorInterface
 {
-    private $magentoInstance;
+    private $catalogRepository;
+    private $attributeManager;
     private $csvHeader;
 
-    public function __construct(Mage $magentoInstance)
+    public function __construct(CatalogRepository $catalogRepository, AttributeManager $attributeManager)
     {
-        $this->magentoInstance = $magentoInstance;
+        $this->catalogRepository = $catalogRepository;
+        $this->attributeManager  = $attributeManager;
     }
 
     public function updateProductStock($product,$stockData)
     {
-            $mage        = $this->magentoInstance;
-            $productId   = $product->getId();
-            $stockItem   = $mage::getModel('cataloginventory/stock_item')->loadByProduct($productId);
-            $stockItemId = $stockItem->getId();
-            $stock       = array();
+        $stockItem = $this->catalogRepository->updateStock($product,$stockData); 
 
-            if (!$stockItemId) {
-                $stockItem->setData('product_id', $product->getId());
-                $stockItem->setData('stock_id', 1); 
-            } else {
-                $stock = $stockItem->getData();
+        $product->getOptionInstance()->unsetOptions()->clearInstance();
+        $stockItem->clearInstance();
+        $product->clearInstance();
+
+        echo "Product updated ".$stockData['sku'];
+    }
+
+    public function loadAttributes($productData,$attributesArray)
+    {
+        foreach ($attributesArray as $attributeName) {
+
+            if ( ! $this->attributeManager->attributeValueExists($attributeName,$productData[$attributeName]) ) {
+                
+                $this->attributeManager->createAttribute($attributeName,$productData[$attributeName]);
+
             }
 
-            foreach($stock as $stockAttribute => $value) {
-                $stock[$stockAttribute] = $stockData[$value];
-            } 
+            $attributeId  = $this->attributeManager->getAttributeId($attributeName,$productData[$attributeName]);
+            $productData[$attributeName] = $attributeId;
+        }
 
-            foreach($stock as $field => $value) {
-                $stockItem->setData($field, $value?$value:0);
-            }
-
-            $stockItem->save();
-
-            $product->getOptionInstance()->unsetOptions()->clearInstance();
-            $stockItem->clearInstance();
-            $product->clearInstance();
-
-            echo "Product updated ".$stockData['sku'];
+        return $productData;
     }
 
     public function createProduct($productData)
     {
-            $mage = $this->magentoInstance;
-
-            $productData['type_id'] 	      = 'simple';
-            $productData['visibility']        = 1; // catalog, search
-            $productData['attribute_set_id']  = 4;  // default attribute set
-            $productData['website_ids']       = array(1); //main website
-
-            $stockData['qty']		       = $productData['qty'];
-            $stockData['min_qty']  	       = 0;
-            $stockData['is_in_stock'] 	       = ((int) $productData['qty']) ? 1 : 0; 
-            $stockData['manage_stock']         = 1; 
-            $stockData['stock_id'] 	       = 1; 
-            $stockData['use_config_manage_stock'] = 0;
-
-            $productModel = $mage::getModel('catalog/product');
-            $productModel->setData(array_merge($productModel->getData(),$productData));
-            $productModel->save();
-
-            $stockModel = $mage::getModel('cataloginventory/stock_item');
-            $stockModel->assignProduct($productModel);
-            $stockModel->setData(array_merge($stockModel->getData(),$stockData));
-            $stockModel->save();
-
-            $productModel->clearInstance();
-            $productModel->getOptionInstance()->unsetOptions()->clearInstance();
-            $stockModel->clearInstance();
+            $productData = $this->loadAttributes($productData,array('color','tamanho','colecao'));
+            
+            $product = $this->catalogRepository->createSimpleProduct($productData);            
+            $stock   = $this->catalogRepository->updateStock($product,$productData);            
+           
+            $product->clearInstance();
+            $product->getOptionInstance()->unsetOptions()->clearInstance();
+            $stock->clearInstance();
 
             echo "Product Created ".$productData['sku'] ;
 
@@ -98,10 +80,10 @@ class ProductImporter implements BatchProcessorInterface
 
         foreach ( $file as $row ) {
 
-	    if( $row == $this->csvHeader ) continue;
+            if( $row == $this->csvHeader or $this->rowIsEmpty($row) ) continue;
 
             $row     = $this->buildAssoc($row);
-            $product = $mage::getModel('catalog/product')->loadByAttribute('sku',$row['sku']); 
+            $product = $this->catalogRepository->getModel('catalog/product')->loadByAttribute('sku',$row['sku']); 
 
             if ( $product ) {
 
@@ -109,15 +91,20 @@ class ProductImporter implements BatchProcessorInterface
 
             } else {
 
-                // $this->createProduct($row);
+                $this->createProduct($row);
             }
-
-            // gc_collect_cycles();
 
         }
 
         echo "End of file: ".$file_name;
 
+    }
+
+    public function rowIsEmpty($row)
+    {
+        $row = array_filter($row);
+
+        return empty($row);
     }
 
 }

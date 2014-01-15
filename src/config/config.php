@@ -28,5 +28,5 @@ $local_config = array(
     'lock_file'         => __DIR__.'/../../locks/process.lock',
 );
 
-$config = $production_config;
+$config = $local_config;
 

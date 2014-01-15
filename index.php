@@ -63,4 +63,24 @@ $app->get('/process/', function () use ($app,$config){
 
 });
 
+use Helpers\Magento\AttributeManager;
+use Repositories\Magento\CatalogRepository;
+use Repositories\Magento\EavCatalogProductRepository;
+use Processors\Magento\ProductImporter;
+
+
+$app->get('/test/', function () use ($app,$config){
+
+
+Mage::app('admin', 'store', array('global_ban_use_cache'=>true))->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
+
+$catalog_repository   = new CatalogRepository(Mage);
+$attribute_repository = new EavCatalogProductRepository(Mage);
+$attribute_manager    = new AttributeManager($attribute_repository);
+$magento_processor    = new ProductImporter($catalog_repository,$attribute_manager);
+$magento_processor->process(new CsvFile('sample.csv'),'sample.csv');
+
+// $magento_processor->process(new CsvFile($argv[1]),basename($argv[1]));
+
+});
 $app->run();
