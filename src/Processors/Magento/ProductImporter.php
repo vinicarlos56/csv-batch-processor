@@ -49,7 +49,7 @@ class ProductImporter implements BatchProcessorInterface
 
     public function createProduct($productData)
     {
-            $productData = $this->loadAttributes($productData,array('color','tamanho','colecao'));
+            $productData = $this->loadAttributes($productData,array('color','tamanho'));
             
             $product = $this->catalogRepository->createSimpleProduct($productData);            
             $stock   = $this->catalogRepository->updateStock($product,$productData);            
