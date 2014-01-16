@@ -25,34 +25,38 @@ class CsvSplitter
 
     public function split($splitSize,$outputName = 'output')
     {
-	$csv_header  = $this->file->getHeader();
-	$rowCount   = 0; 
-	$fileCount  = 1; 
+        $csv_header  = $this->file->getHeader();
+        $rowCount   = 0; 
+        $fileCount  = 0; 
 
-	$fs = new Filesystem;
+        $fs = new Filesystem;
 
-    //TODO: fix mkdir
-	if ( ! $fs->exists($this->outputDir) ) $fs->mkdir($this->outputDir);
+        //TODO: fix mkdir
+        if ( ! $fs->exists($this->outputDir) ) $fs->mkdir($this->outputDir);
 
-	foreach($this->file as $row) {
+        foreach($this->file as $row) {
 
-	    if ( $rowCount % $splitSize == 0 ) {
+            if ( $rowCount % $splitSize == 0 ) {
 
-		$currentFileName = sprintf('%s'.$outputName.'%s.csv',$this->outputDir,$fileCount++); 
+                $currentFileName = sprintf('%s'.$outputName.'%s.csv',$this->outputDir,++$fileCount); 
 
-		$fs->touch($currentFileName);
+                $fs->touch($currentFileName);
 
-		$currentFile = new CsvFile($currentFileName);
-		$currentFile->writeRow($csv_header);
+                $currentFile = new CsvFile($currentFileName);
+                $currentFile->writeRow($csv_header);
 
-	    } else {
+                if ($row != $csv_header) {
+                    $currentFile->writeRow($row);
+                }
 
-		$currentFile->writeRow($row);
+            } else {
 
-	    }
+                $currentFile->writeRow($row);
 
-	    $rowCount++;
-	}
+            }
+
+            $rowCount++;
+        }
     }
 }
 
