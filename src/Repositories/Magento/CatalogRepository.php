@@ -38,7 +38,6 @@ class CatalogRepository
             if ( ! $this->attributeManager->attributeValueExists($attributeName,$productData[$attributeName]) ) {
                 
                 $this->attributeManager->createAttribute($attributeName,$productData[$attributeName]);
-
             }
 
             $attributeId  = $this->attributeManager->getAttributeId($attributeName,$productData[$attributeName]);

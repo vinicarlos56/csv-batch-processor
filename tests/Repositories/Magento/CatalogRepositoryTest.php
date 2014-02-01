@@ -14,9 +14,12 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
 
     public function testCreatesSimpleProducts()
     {        
-        // var_dump(new Helpers\Magento\AttributeManager);
-        // exit();
-        $productData       = $this->getProductData();
+        $productData        = $this->getProductData();
+        $defaultProductData = array(
+            'type_id'=>'simple',
+            'attribute_set_id'=>4,
+            'website_ids'=>array(1)
+        );
 
         $productStub = $this->getMockBuilder('stdClass')
             ->setMethods(array('getData','setData','save'))
@@ -28,7 +31,7 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
 
         $productStub->expects($this->once())
             ->method('setData')
-            ->with($productData+array('type_id'=>'simple','attribute_set_id'=>4,'website_ids'=>array(1)));
+            ->with($productData+$defaultProductData);
 
         $productStub->expects($this->once())
             ->method('save')
@@ -44,22 +47,84 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
 
         $attributeManagerMock = $this->getMockBuilder('Helpers\Magento\AttributeManager')
             ->disableOriginalConstructor()
-            // ->setMethods(array('attributeValueExists','createAttribute','getAttributeId'))
             ->getMock();
-        //
-        // $attributeManagerMock->expects($this->exactly(2))
-        //     ->method('attributeValueExists')
-        //     ->will($this->returnValue(false));
-        //
-        // $attributeManagerMock->expects($this->exactly(2))
-        //     ->method('getAttributeId')
-        //     ->will($this->onConsecutiveCalls(5,6));
 
         $catalogRepository = new CatalogRepository($mageMock,$attributeManagerMock);
         $catalogRepository->createSimpleProduct($productData);
 
     }
 
+    public function testLoadAttributesIdsInProductDataArrayWhenAttributeExists()
+    {
+        $productData = $this->getProductData();
+        $attributesArray = array('color','tamanho');
+
+        $mageMock = $this->getMockBuilder('Helpers\Magento\MageWrapper')
+            ->getMock();
+
+        $attributeManagerMock = $this->getMockBuilder('Helpers\Magento\AttributeManager')
+            ->disableOriginalConstructor()
+            ->setMethods(array('attributeValueExists','createAttribute','getAttributeId'))
+            ->getMock();
+
+        $attributeManagerMock->expects($this->never())
+            ->method('createAttribute');
+
+        $attributeManagerMock->expects($this->exactly(2))
+            ->method('attributeValueExists')
+            ->will($this->returnValue(true));
+
+        $attributeManagerMock->expects($this->exactly(2))
+            ->method('getAttributeId')
+            ->will($this->onConsecutiveCalls(5,6));
+
+        $catalogRepository = new CatalogRepository($mageMock,$attributeManagerMock);
+        $newProductData    = $catalogRepository->loadAttributes($productData,$attributesArray);
+
+        $productData['color']   = 5;
+        $productData['tamanho'] = 6;
+
+        $this->assertEquals($productData,$newProductData);
+    }
+
+    public function testCreateAttributesAndLoadAttributesIdsInProductDataArray()
+    {
+        // $this->markTestIncomplete();
+        $productData = $this->getProductData();
+        $attributesArray = array('color','tamanho');
+
+        $mageMock = $this->getMockBuilder('Helpers\Magento\MageWrapper')
+            ->getMock();
+
+        $attributeManagerMock = $this->getMockBuilder('Helpers\Magento\AttributeManager')
+            ->disableOriginalConstructor()
+            ->setMethods(array('attributeValueExists','createAttribute','getAttributeId'))
+            ->getMock();
+
+        $attributeManagerMock->expects($this->exactly(2))
+            ->method('attributeValueExists')
+            ->will($this->returnValue(false));
+
+        $attributeManagerMock->expects($this->at(1))
+            ->method('createAttribute')
+            ->with($this->equalTo('color'),$this->equalTo('teste'));
+
+        $attributeManagerMock->expects($this->at(4))
+            ->method('createAttribute')
+            ->with($this->equalTo('tamanho'),$this->equalTo('teste'));
+
+        $attributeManagerMock->expects($this->exactly(2))
+            ->method('getAttributeId')
+            ->will($this->onConsecutiveCalls(5,6));
+
+        $catalogRepository = new CatalogRepository($mageMock,$attributeManagerMock);
+        $newProductData    = $catalogRepository->loadAttributes($productData,$attributesArray);
+
+        $productData['color']   = 5;
+        $productData['tamanho'] = 6;
+
+        $this->assertEquals($productData,$newProductData);
+    }
     private function getProductData()
     {
         return array(
