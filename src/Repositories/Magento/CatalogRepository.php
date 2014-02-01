@@ -2,20 +2,65 @@
 
 namespace Repositories\Magento;
 
+use Helpers\Magento\AttributeManager;
+use Helpers\Magento\MageWrapper;
+
 class CatalogRepository
 {
     private $magentoInstance;
     
-    function __construct(Mage $magentoInstance)
+    function __construct(MageWrapper $magentoInstance, AttributeManager $attributeManager)
     {
-       $this->magentoInstance = $magentoInstance; 
+       $this->magentoInstance  = $magentoInstance; 
+       $this->attributeManager = $attributeManager; 
     }
 
     public function getModel($modelName)
     {
-        $mage = $this->magentoInstance;
+        return $this->magentoInstance->getModel($modelName);
+    }
 
-        return $mage::getModel($modelName);
+    public function updateProductStock($product,$stockData)
+    {
+        $stockItem = $this->catalogRepository->updateStock($product,$stockData); 
+
+        $product->getOptionInstance()->unsetOptions()->clearInstance();
+        $stockItem->clearInstance();
+        $product->clearInstance();
+
+        echo "Product updated ".$stockData['sku'];
+    }
+
+    public function loadAttributes($productData,$attributesArray)
+    {
+        foreach ($attributesArray as $attributeName) {
+
+            if ( ! $this->attributeManager->attributeValueExists($attributeName,$productData[$attributeName]) ) {
+                
+                $this->attributeManager->createAttribute($attributeName,$productData[$attributeName]);
+
+            }
+
+            $attributeId  = $this->attributeManager->getAttributeId($attributeName,$productData[$attributeName]);
+            $productData[$attributeName] = $attributeId;
+        }
+
+        return $productData;
+    }
+
+    public function createProduct($productData)
+    {
+            $productData = $this->loadAttributes($productData,array('color','tamanho'));
+            
+            $product = $this->createSimpleProduct($productData);            
+            $stock   = $this->updateStock($product,$productData);            
+           
+            $product->clearInstance();
+            $product->getOptionInstance()->unsetOptions()->clearInstance();
+            $stock->clearInstance();
+
+            echo "Product Created ".$productData['sku'] ;
+
     }
 
     public function createSimpleProduct($productData)
