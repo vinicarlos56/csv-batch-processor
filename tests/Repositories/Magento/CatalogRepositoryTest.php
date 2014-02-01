@@ -1,10 +1,10 @@
 <?php
 
-class CatalogRepositoryTest.php
+class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
 {
     
-    function __construct(argument)
+    public function testIsWorking()
     {
-        // code...
+        $this->assertTrue(true);
     }
 }
