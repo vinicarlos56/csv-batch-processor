@@ -123,10 +123,12 @@ class CatalogRepository
 
         foreach($stock as $stockAttribute => $value) {
         
-            if( isset($stockData[$stockAttribute]) )
+            //TODO: check if this change works
+            if( isset($stockData[$stockAttribute]) ) {
                 $stock[$stockAttribute] = $stockData[$stockAttribute] ?: 0;
 
-            $stockItem->setData($stockAttribute,$stock[$stockAttribute]); 
+                $stockItem->setData($stockAttribute,$stock[$stockAttribute]); 
+            }
         } 
 
         $stockItem->save();

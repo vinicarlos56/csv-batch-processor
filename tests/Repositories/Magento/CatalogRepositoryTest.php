@@ -125,6 +125,101 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals($productData,$newProductData);
     }
+
+    public function testUpdatesTheStockCorrectly()
+    {
+        $productId = 4;
+        $stockData = $this->getStockData();
+        $productData = $this->getProductData();
+
+        $productStub = $this->getMockBuilder('stdClass')
+            ->setMethods(array('getId'))
+            ->getMock();
+
+        $productStub->expects($this->any())
+            ->method('getId')
+            ->will($this->returnValue($productId));
+
+        $stockStub = $this->getMockBuilder('stdClass')
+            ->setMethods(array('getId','getData','setData','save','loadByProduct'))
+            ->getMock();
+
+        $stockStub->expects($this->once())
+            ->method('loadByProduct')
+            ->with($productId)
+            ->will($this->returnValue($stockStub));
+
+        $stockStub->expects($this->once())
+            ->method('getId')
+            ->will($this->returnValue(true));
+
+        $stockStub->expects($this->once())
+            ->method('getData')
+            ->will($this->returnValue($stockData));
+
+        $stockStub->expects($this->at(3))
+            ->method('setData')
+            ->with('qty',4);
+
+        $stockStub->expects($this->at(4))
+            ->method('setData')
+            ->with('is_in_stock',1);
+
+        $stockStub->expects($this->once())
+            ->method('save')
+            ->will($this->returnValue($stockStub));
+
+        $mageMock = $this->getMockBuilder('Helpers\Magento\MageWrapper')
+            ->setMethods(array('getModel'))
+            ->getMock();
+
+        $mageMock->expects($this->once())
+            ->method('getModel')
+            ->will($this->returnValue($stockStub));
+
+        $attributeManagerMock = $this->getMockBuilder('Helpers\Magento\AttributeManager')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $catalogRepository = new CatalogRepository($mageMock,$attributeManagerMock);
+        $newProductData    = $catalogRepository->updateStock($productStub,$productData);
+
+    }
+
+    private function getStockData()
+    {
+        return array (
+                'stock_id' => '1',
+                'qty' => 'o.0000',
+                'min_qty' => '0.0000',
+                'use_config_min_qty' => '1',
+                'is_qty_decimal' => '0',
+                'backorders' => '0',
+                'use_config_backorders' => '1',
+                'min_sale_qty' => '1.0000',
+                'use_config_min_sale_qty' => '1',
+                'max_sale_qty' => '0.0000',
+                'use_config_max_sale_qty' => '1',
+                'is_in_stock' => '0',
+                'low_stock_date' => NULL,
+                'notify_stock_qty' => NULL,
+                'use_config_notify_stock_qty' => '1',
+                'manage_stock' => '0',
+                'use_config_manage_stock' => '1',
+                'stock_status_changed_auto' => '0',
+                'use_config_qty_increments' => '1',
+                'qty_increments' => '0.0000',
+                'use_config_enable_qty_inc' => '1',
+                'enable_qty_increments' => '0',
+                'is_decimal_divided' => '0',
+                'reserved_qty' => '0.0000',
+                'type_id' => 'simple',
+                'stock_status_changed_automatically' => '0',
+                'use_config_enable_qty_increments' => '1',
+            );
+
+    }
+
     private function getProductData()
     {
         return array(
@@ -137,12 +232,12 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
             "color"=> 'teste',
             "cod_tamanho"=> 'teste',
             "tamanho"=> 'teste',
-            "qty"=> 'teste',
+            "qty"=> 4,
             "price"=> 'teste',
             "special_price"=> 'teste',
             "colecao"=> 'teste',
             "visibility"=> '1',
-            "is_in_stock"=> 'teste',
+            "is_in_stock"=> 1,
             "type"=> 'teste',
             "attribute_set"=> 'teste',
             "product_website"=> 'teste',
