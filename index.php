@@ -80,7 +80,21 @@ $attribute_manager    = new AttributeManager($attribute_repository);
 $magento_processor    = new ProductImporter($catalog_repository,$attribute_manager);
 $magento_processor->process(new CsvFile('sample.csv'),'sample.csv');
 
+// probably new usage
+// $mageWrapper        = new MageWrapper(Mage);
+// $eavRepository      = new EavCatalogProductRepository($mageWrapper);
+// $catalogRepository  = new CatalogRepository($mageWrapper,$eavRepository);
+// $magentoProcessor   = new ProductImporter($catalogRepository);
+
 // $magento_processor->process(new CsvFile($argv[1]),basename($argv[1]));
 
 });
 $app->run();
+
+
+
+
+
+
+
+
