@@ -4,7 +4,7 @@ use Processors\Magento\ProductImporter as ProductImporter;
 
 class ProductImporterTest extends PHPUnit_Framework_TestCase
 {
-    public function testProcessMethod()
+    public function testProcessMethodCreatesProduct()
     {
         $sku       = 'sku';
         $fileName  = 'filename';
@@ -25,6 +25,99 @@ class ProductImporterTest extends PHPUnit_Framework_TestCase
             ->method('createProduct')
             ->with(array_combine($csvHeader,$firstRow));
 
+        $csvFileMock = $this->getCsvFileMock($csvHeader,$firstRow);
+
+        $productImporter = new ProductImporter($catalogRepositoryMock);
+
+        ob_start();
+
+        $productImporter->process($csvFileMock,$fileName);
+        $outputBuffer = ob_get_contents();
+
+        ob_clean();
+
+        $this->assertEquals("End of file: {$fileName}",$outputBuffer);
+    }    
+
+    public function testProcessMethodUpdatesProductStock()
+    {
+        $sku       = 'sku';
+        $fileName  = 'filename';
+        $csvHeader = array('sku','qty');
+        $firstRow  = array($sku,'4');
+        
+        $catalogRepositoryMock = $this->getMockBuilder('Repositories\Magento\CatalogRepository')
+            ->disableOriginalConstructor()
+            ->setMethods(array('productExists','updateProductStock','createProduct'))
+            ->getMock();
+
+        $catalogRepositoryMock->expects($this->once())
+            ->method('productExists')
+            ->with($sku)
+            ->will($this->returnValue(true));
+
+        $catalogRepositoryMock->expects($this->once())
+            ->method('updateProductStock')
+            ->with(array_combine($csvHeader,$firstRow));
+
+        $csvFileMock = $this->getCsvFileMock($csvHeader,$firstRow);
+
+        $productImporter = new ProductImporter($catalogRepositoryMock);
+
+        ob_start();
+
+        $productImporter->process($csvFileMock,$fileName);
+        $outputBuffer = ob_get_contents();
+
+        ob_clean();
+
+        $this->assertEquals("End of file: {$fileName}",$outputBuffer);
+    }    
+
+    // TODO: evaluates this test and maby move to another class
+    public function testBuildAssoc()
+    {
+        $csvHeader = array('sku','qty');
+        $firstRow  = array('teste','4');
+
+        $catalogRepositoryMock = $this->getMockBuilder('Repositories\Magento\CatalogRepository')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $productImporter = new ProductImporter($catalogRepositoryMock);
+        $productImporter->setCsvHeader($csvHeader);
+
+        $result = $productImporter->buildAssoc($firstRow);
+
+        $this->assertEquals(array('sku'=>'teste','qty'=>'4'),$result);
+    }
+
+    public function testRowIsEmpty()
+    {
+        $catalogRepositoryMock = $this->getMockBuilder('Repositories\Magento\CatalogRepository')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $productImporter = new ProductImporter($catalogRepositoryMock);
+
+        $result = $productImporter->rowIsEmpty(array());
+        $this->assertTrue($result);
+
+        $result = $productImporter->rowIsEmpty(array(''));
+        $this->assertTrue($result);
+
+        $result = $productImporter->rowIsEmpty(null);
+        $this->assertTrue($result);
+
+        $result = $productImporter->rowIsEmpty(' ');
+        $this->assertTrue($result);
+
+        $result = $productImporter->rowIsEmpty(array('foo','bar'));
+        $this->assertFalse($result);
+    }
+
+    public function getCsvFileMock($csvHeader,$firstRow)
+    {
         $csvFileMock = $this->getMockBuilder('Keboola\Csv\CsvFile')
             ->disableOriginalConstructor()
             ->setMethods(array('getHeader','rewind','valid','current','next'))
@@ -65,16 +158,7 @@ class ProductImporterTest extends PHPUnit_Framework_TestCase
             ->method('valid')
             ->will($this->returnValue(false));
 
-        $productImporter = new ProductImporter($catalogRepositoryMock);
-
-        ob_start();
-
-        $productImporter->process($csvFileMock,$fileName);
-        $outputBuffer = ob_get_contents();
-
-        ob_clean();
-
-        $this->assertEquals("End of file: {$fileName}",$outputBuffer);
-    }    
+        return $csvFileMock;
+    }
 }
 

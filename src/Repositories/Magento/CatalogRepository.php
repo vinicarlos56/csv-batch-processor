@@ -20,7 +20,7 @@ class CatalogRepository
         return $this->magentoInstance->getModel($modelName);
     }
 
-    public function updateProductStock($product,$stockData)
+    public function updateProductStock($stockData)
     {
         $stockItem = $this->catalogRepository->updateStock($product,$stockData); 
 

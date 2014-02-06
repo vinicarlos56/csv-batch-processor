@@ -42,7 +42,7 @@ class ProductImporter implements BatchProcessorInterface
 
             if ( $product ) {
 
-                $this->catalogRepository->updateProductStock($product,$row);
+                $this->catalogRepository->updateProductStock($row);
 
             } else {
 
@@ -57,53 +57,10 @@ class ProductImporter implements BatchProcessorInterface
 
     public function rowIsEmpty($row)
     {
+        if ( ! $row or ! is_array($row) ) return true;
+
         $row = array_filter($row);
 
         return empty($row);
     }
-
-
-    // public function updateProductStock($product,$stockData)
-    // {
-    //     $stockItem = $this->catalogRepository->updateStock($product,$stockData); 
-    //
-    //     $product->getOptionInstance()->unsetOptions()->clearInstance();
-    //     $stockItem->clearInstance();
-    //     $product->clearInstance();
-    //
-    //     echo "Product updated ".$stockData['sku'];
-    // }
-
-    // public function loadAttributes($productData,$attributesArray)
-    // {
-    //     foreach ($attributesArray as $attributeName) {
-    //
-    //         if ( ! $this->attributeManager->attributeValueExists($attributeName,$productData[$attributeName]) ) {
-    //             
-    //             $this->attributeManager->createAttribute($attributeName,$productData[$attributeName]);
-    //
-    //         }
-    //
-    //         $attributeId  = $this->attributeManager->getAttributeId($attributeName,$productData[$attributeName]);
-    //         $productData[$attributeName] = $attributeId;
-    //     }
-    //
-    //     return $productData;
-    // }
-
-    // public function createProduct($productData)
-    // {
-    //         $productData = $this->loadAttributes($productData,array('color','tamanho'));
-    //         
-    //         $product = $this->catalogRepository->createSimpleProduct($productData);            
-    //         $stock   = $this->catalogRepository->updateStock($product,$productData);            
-    //        
-    //         $product->clearInstance();
-    //         $product->getOptionInstance()->unsetOptions()->clearInstance();
-    //         $stock->clearInstance();
-    //
-    //         echo "Product Created ".$productData['sku'] ;
-    //
-    // }
-
 }
