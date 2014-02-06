@@ -2,14 +2,14 @@
 
 namespace Repositories\Magento;
 
-use Helpers\Magento\AttributeManager;
+use Repositories\Magento\EavCatalogProductRepository as EavCatalogProductRepository;
 use Helpers\Magento\MageWrapper;
 
 class CatalogRepository
 {
     private $magentoInstance;
     
-    function __construct(MageWrapper $magentoInstance, AttributeManager $attributeManager)
+    function __construct(MageWrapper $magentoInstance, EavCatalogProductRepository $attributeManager)
     {
        $this->magentoInstance  = $magentoInstance; 
        $this->attributeManager = $attributeManager; 

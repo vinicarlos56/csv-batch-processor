@@ -1,7 +1,7 @@
 <?php
 
 use Repositories\Magento\CatalogRepository as CatalogRepository;
-// use Helpers\Magento\AttributeManager as AttributeManager;
+// use Repositories\Magento\EavCatalogProductRepository as AttributeManager;
 // use Helpers\Magento\MageWrapper as MageWrapper;
 
 class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
@@ -45,7 +45,7 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
             ->method('getModel')
             ->will($this->returnValue($productStub));
 
-        $attributeManagerMock = $this->getMockBuilder('Helpers\Magento\AttributeManager')
+        $attributeManagerMock = $this->getMockBuilder('Repositories\Magento\EavCatalogProductRepository')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -62,7 +62,7 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
         $mageMock = $this->getMockBuilder('Helpers\Magento\MageWrapper')
             ->getMock();
 
-        $attributeManagerMock = $this->getMockBuilder('Helpers\Magento\AttributeManager')
+        $attributeManagerMock = $this->getMockBuilder('Repositories\Magento\EavCatalogProductRepository')
             ->disableOriginalConstructor()
             ->setMethods(array('attributeValueExists','createAttribute','getAttributeId'))
             ->getMock();
@@ -96,7 +96,7 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
         $mageMock = $this->getMockBuilder('Helpers\Magento\MageWrapper')
             ->getMock();
 
-        $attributeManagerMock = $this->getMockBuilder('Helpers\Magento\AttributeManager')
+        $attributeManagerMock = $this->getMockBuilder('Repositories\Magento\EavCatalogProductRepository')
             ->disableOriginalConstructor()
             ->setMethods(array('attributeValueExists','createAttribute','getAttributeId'))
             ->getMock();
@@ -177,7 +177,7 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
             ->method('getModel')
             ->will($this->returnValue($stockStub));
 
-        $attributeManagerMock = $this->getMockBuilder('Helpers\Magento\AttributeManager')
+        $attributeManagerMock = $this->getMockBuilder('Repositories\Magento\EavCatalogProductRepository')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -236,7 +236,7 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
             ->method('getModel')
             ->will($this->returnValue($stockStub));
 
-        $attributeManagerMock = $this->getMockBuilder('Helpers\Magento\AttributeManager')
+        $attributeManagerMock = $this->getMockBuilder('Repositories\Magento\EavCatalogProductRepository')
             ->disableOriginalConstructor()
             ->getMock();
 
