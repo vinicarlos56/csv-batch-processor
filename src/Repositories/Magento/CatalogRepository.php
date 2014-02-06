@@ -86,10 +86,11 @@ class CatalogRepository
 
         if ( ! $stockItem->getId() ) {
          
+            // TODO:check why do I need this
             $stock = array (
                 'product_id' => $product->getId(),
                 'stock_id' => '1',
-                'qty' => 'o.0000',
+                'qty' => '0.0000',
                 'min_qty' => '0.0000',
                 'use_config_min_qty' => '1',
                 'is_qty_decimal' => '0',

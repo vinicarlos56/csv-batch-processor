@@ -126,7 +126,7 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($productData,$newProductData);
     }
 
-    public function testUpdatesTheStockCorrectly()
+    public function testUpdatesTheStockCorrectlyWhenStockDataAlreadyExists()
     {
         $productId = 4;
         $stockData = $this->getStockData();
@@ -186,11 +186,70 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
 
     }
 
+    public function testUpdatesTheStockCorrectlyWhenStockDataDoesNotExists()
+    {
+        $productId = 4;
+        $stockData = $this->getStockData();
+        $productData = $this->getProductData();
+
+        $productStub = $this->getMockBuilder('stdClass')
+            ->setMethods(array('getId'))
+            ->getMock();
+
+        $productStub->expects($this->any())
+            ->method('getId')
+            ->will($this->returnValue($productId));
+
+        $stockStub = $this->getMockBuilder('stdClass')
+            ->setMethods(array('getId','getData','setData','save','loadByProduct'))
+            ->getMock();
+
+        $stockStub->expects($this->once())
+            ->method('loadByProduct')
+            ->with($productId)
+            ->will($this->returnValue($stockStub));
+
+        $stockStub->expects($this->once())
+            ->method('getId')
+            ->will($this->returnValue(false));
+
+        $stockStub->expects($this->never())
+            ->method('getData');
+
+        $stockStub->expects($this->at(2))
+            ->method('setData')
+            ->with('qty',4);
+
+        $stockStub->expects($this->at(3))
+            ->method('setData')
+            ->with('is_in_stock',1);
+
+        $stockStub->expects($this->once())
+            ->method('save')
+            ->will($this->returnValue($stockStub));
+
+        $mageMock = $this->getMockBuilder('Helpers\Magento\MageWrapper')
+            ->setMethods(array('getModel'))
+            ->getMock();
+
+        $mageMock->expects($this->once())
+            ->method('getModel')
+            ->will($this->returnValue($stockStub));
+
+        $attributeManagerMock = $this->getMockBuilder('Helpers\Magento\AttributeManager')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $catalogRepository = new CatalogRepository($mageMock,$attributeManagerMock);
+        $newProductData    = $catalogRepository->updateStock($productStub,$productData);
+
+    }
+
     private function getStockData()
     {
         return array (
                 'stock_id' => '1',
-                'qty' => 'o.0000',
+                'qty' => '0.0000',
                 'min_qty' => '0.0000',
                 'use_config_min_qty' => '1',
                 'is_qty_decimal' => '0',
