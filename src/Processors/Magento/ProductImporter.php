@@ -13,53 +13,9 @@ class ProductImporter implements BatchProcessorInterface
     private $attributeManager;
     private $csvHeader;
 
-    public function __construct(CatalogRepository $catalogRepository, AttributeManager $attributeManager)
+    public function __construct(CatalogRepository $catalogRepository)
     {
         $this->catalogRepository = $catalogRepository;
-        $this->attributeManager  = $attributeManager;
-    }
-
-    public function updateProductStock($product,$stockData)
-    {
-        $stockItem = $this->catalogRepository->updateStock($product,$stockData); 
-
-        $product->getOptionInstance()->unsetOptions()->clearInstance();
-        $stockItem->clearInstance();
-        $product->clearInstance();
-
-        echo "Product updated ".$stockData['sku'];
-    }
-
-    public function loadAttributes($productData,$attributesArray)
-    {
-        foreach ($attributesArray as $attributeName) {
-
-            if ( ! $this->attributeManager->attributeValueExists($attributeName,$productData[$attributeName]) ) {
-                
-                $this->attributeManager->createAttribute($attributeName,$productData[$attributeName]);
-
-            }
-
-            $attributeId  = $this->attributeManager->getAttributeId($attributeName,$productData[$attributeName]);
-            $productData[$attributeName] = $attributeId;
-        }
-
-        return $productData;
-    }
-
-    public function createProduct($productData)
-    {
-            $productData = $this->loadAttributes($productData,array('color','tamanho'));
-            
-            $product = $this->catalogRepository->createSimpleProduct($productData);            
-            $stock   = $this->catalogRepository->updateStock($product,$productData);            
-           
-            $product->clearInstance();
-            $product->getOptionInstance()->unsetOptions()->clearInstance();
-            $stock->clearInstance();
-
-            echo "Product Created ".$productData['sku'] ;
-
     }
 
     public function setCsvHeader($header)
@@ -76,22 +32,21 @@ class ProductImporter implements BatchProcessorInterface
     {
        
         $this->setCsvHeader($file->getHeader());
-        $mage = $this->magentoInstance;
 
         foreach ( $file as $row ) {
 
             if( $row == $this->csvHeader or $this->rowIsEmpty($row) ) continue;
 
             $row     = $this->buildAssoc($row);
-            $product = $this->catalogRepository->getModel('catalog/product')->loadByAttribute('sku',$row['sku']); 
+            $product = $this->catalogRepository->productExists($row['sku']); 
 
             if ( $product ) {
 
-                $this->updateProductStock($product,$row);
+                $this->catalogRepository->updateProductStock($product,$row);
 
             } else {
 
-                $this->createProduct($row);
+                $this->catalogRepository->createProduct($row);
             }
 
         }
@@ -106,5 +61,49 @@ class ProductImporter implements BatchProcessorInterface
 
         return empty($row);
     }
+
+
+    // public function updateProductStock($product,$stockData)
+    // {
+    //     $stockItem = $this->catalogRepository->updateStock($product,$stockData); 
+    //
+    //     $product->getOptionInstance()->unsetOptions()->clearInstance();
+    //     $stockItem->clearInstance();
+    //     $product->clearInstance();
+    //
+    //     echo "Product updated ".$stockData['sku'];
+    // }
+
+    // public function loadAttributes($productData,$attributesArray)
+    // {
+    //     foreach ($attributesArray as $attributeName) {
+    //
+    //         if ( ! $this->attributeManager->attributeValueExists($attributeName,$productData[$attributeName]) ) {
+    //             
+    //             $this->attributeManager->createAttribute($attributeName,$productData[$attributeName]);
+    //
+    //         }
+    //
+    //         $attributeId  = $this->attributeManager->getAttributeId($attributeName,$productData[$attributeName]);
+    //         $productData[$attributeName] = $attributeId;
+    //     }
+    //
+    //     return $productData;
+    // }
+
+    // public function createProduct($productData)
+    // {
+    //         $productData = $this->loadAttributes($productData,array('color','tamanho'));
+    //         
+    //         $product = $this->catalogRepository->createSimpleProduct($productData);            
+    //         $stock   = $this->catalogRepository->updateStock($product,$productData);            
+    //        
+    //         $product->clearInstance();
+    //         $product->getOptionInstance()->unsetOptions()->clearInstance();
+    //         $stock->clearInstance();
+    //
+    //         echo "Product Created ".$productData['sku'] ;
+    //
+    // }
 
 }

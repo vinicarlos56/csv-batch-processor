@@ -1,41 +1,80 @@
 <?php
 
+use Processors\Magento\ProductImporter as ProductImporter;
+
 class ProductImporterTest extends PHPUnit_Framework_TestCase
 {
     public function testProcessMethod()
     {
-        $this->assertTrue(true);
-        // mock CatalogRepository( mock Mage)
-        // mock AttributeManager(mock AttributeRepository(mock Mage))
-        // mock CsvFile
-        // assert process
-        // new ProductImporter(CatalogRepository, AttributeManager)
+        $sku       = 'sku';
+        $fileName  = 'filename';
+        $csvHeader = array('sku','qty');
+        $firstRow  = array($sku,'4');
+        
+        $catalogRepositoryMock = $this->getMockBuilder('Repositories\Magento\CatalogRepository')
+            ->disableOriginalConstructor()
+            ->setMethods(array('productExists','updateProductStock','createProduct'))
+            ->getMock();
 
-        // $mage = $this->getMockBuilder('Mage')
-        //     ->setMethods(array('getModel','loadByAttribute'))
-        //     ->getMock();
-        //
-        // $mage->expects($this->once())
-        //     ->method('getModel')
-        //     ->will($this->returnValue($mage));
-        //
-        // $mage->expects($this->once())
-        //     ->method('loadByAttribute')
-        //     ->will($this->returnValue(null));
-        //
-        // $attributeManager = $this->getMockBuilder('AttributeManager')
-        //     ->setMethods(array('attributeValueExists','createAttribute','getAttributeId'))
-        //     ->getMock();
+        $catalogRepositoryMock->expects($this->once())
+            ->method('productExists')
+            ->with($sku)
+            ->will($this->returnValue(false));
 
-        // $attribute_repository = new EavCatalogProductRepository(Mage);
-        // $attribute_manager    = new AttributeManager($attribute_repository);
-        // $magento_processor    = new ProductImporter($catalog_repository,$attribute_manager);
+        $catalogRepositoryMock->expects($this->once())
+            ->method('createProduct')
+            ->with(array_combine($csvHeader,$firstRow));
 
-        // $catalogRepository = new CatalogRepository($mage);
-        // $attributeManager  = new AttributeManager($mage);
-        // $productImporter   = new ProductImporter($catalogRepository);
-        //
+        $csvFileMock = $this->getMockBuilder('Keboola\Csv\CsvFile')
+            ->disableOriginalConstructor()
+            ->setMethods(array('getHeader','rewind','valid','current','next'))
+            ->getMock();
 
+        $csvFileMock->expects($this->at(0))
+            ->method('getHeader')
+            ->will($this->returnValue($csvHeader));
+
+        $csvFileMock->expects($this->at(1))
+            ->method('rewind');
+
+        // header
+        $csvFileMock->expects($this->at(2))
+            ->method('valid')
+            ->will($this->returnValue(true));
+
+        $csvFileMock->expects($this->at(3))
+            ->method('current')
+            ->will($this->returnValue($csvHeader));
+
+        $csvFileMock->expects($this->at(4))
+            ->method('next');
+
+        // first row
+        $csvFileMock->expects($this->at(5))
+            ->method('valid')
+            ->will($this->returnValue(true));
+
+        $csvFileMock->expects($this->at(6))
+            ->method('current')
+            ->will($this->returnValue($firstRow));
+
+        $csvFileMock->expects($this->at(7))
+            ->method('next');
+
+        $csvFileMock->expects($this->at(8))
+            ->method('valid')
+            ->will($this->returnValue(false));
+
+        $productImporter = new ProductImporter($catalogRepositoryMock);
+
+        ob_start();
+
+        $productImporter->process($csvFileMock,$fileName);
+        $outputBuffer = ob_get_contents();
+
+        ob_clean();
+
+        $this->assertEquals("End of file: {$fileName}",$outputBuffer);
     }    
 }
 
