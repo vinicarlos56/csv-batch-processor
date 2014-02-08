@@ -11,16 +11,20 @@ class CsvSplitter
     private $file;   	
     private $outputDir;   	
     
-    public function __construct(CsvFile $file,$outputDir)
+    public function __construct($file,$outputDir)
     {
-	$this->file 	 = $file;	
-	$this->outputDir = $outputDir;
+        $this->file 	 = $file;	
+        $this->outputDir = $outputDir;
     }
 
-    public function clearOutputFiles()
+    public function setCsvHandler($csvHandler)
     {
-	// $fs = new Filesystem;
-	// $fs->remove($this->outputDir);
+        $this->csvHandler = $csvHandler;
+    }
+
+    public function setFileHandler($fileHandler)
+    {
+        $this->fileHandler = $fileHandler;
     }
 
     public function split($splitSize,$outputName = 'output')
@@ -29,10 +33,8 @@ class CsvSplitter
         $rowCount   = 0; 
         $fileCount  = 0; 
 
-        $fs = new Filesystem;
-
         //TODO: fix mkdir
-        if ( ! $fs->exists($this->outputDir) ) $fs->mkdir($this->outputDir);
+        if ( ! $this->fileHandler->exists($this->outputDir) ) $this->fileHandler->mkdir($this->outputDir);
 
         foreach($this->file as $row) {
 
@@ -40,18 +42,17 @@ class CsvSplitter
 
                 $currentFileName = sprintf('%s'.$outputName.'%s.csv',$this->outputDir,++$fileCount); 
 
-                $fs->touch($currentFileName);
+                $this->fileHandler->touch($currentFileName);
 
-                $currentFile = new CsvFile($currentFileName);
-                $currentFile->writeRow($csv_header);
+                $this->csvHandler->writeRow($currentFileName,$csv_header);
 
                 if ($row != $csv_header) {
-                    $currentFile->writeRow($row);
+                    $this->csvHandler->writeRow($currentFileName,$row);
                 }
 
             } else {
 
-                $currentFile->writeRow($row);
+                $this->csvHandler->writeRow($currentFileName,$row);
 
             }
 
