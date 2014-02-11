@@ -2,15 +2,18 @@
 
 class MageWrapper
 {
-    public function getModel()
+    private $mage;
+    
+    public function __construct(Mage $mage)
     {
-        // code...
-    }    
-
-    public function loadByAttribute()
-    {
-        // code...
+        $this->mage = $mage;
     }
+    public function getModel($model)
+    {
+        $mage = $this->mage;
+
+        return $mage::getModel($model);
+    }    
     
 }
 

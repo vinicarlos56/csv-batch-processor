@@ -7,8 +7,10 @@ include __DIR__.'/src/config/config.php';
 
 require_once $config['magento_full_path'];
 
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\ProcessBuilder;
 use Symfony\Component\Process\Process;
+use Helpers\CSV\CsvHandler;
 use Helpers\CSV\CsvSplitter;
 use Helpers\ProcessLocker;
 use Keboola\Csv\CsvFile;
@@ -63,7 +65,7 @@ $app->get('/process/', function () use ($app,$config){
 
 });
 
-use Helpers\Magento\AttributeManager;
+use Helpers\Magento\MageWrapper;
 use Repositories\Magento\CatalogRepository;
 use Repositories\Magento\EavCatalogProductRepository;
 use Processors\Magento\ProductImporter;
@@ -71,24 +73,28 @@ use Processors\Magento\ProductImporter;
 
 $app->get('/test/', function () use ($app,$config){
 
+ini_set('max_execution_time',-1);
 
 Mage::app('admin', 'store', array('global_ban_use_cache'=>true))->setCurrentStore(Mage_Core_Model_App::ADMIN_STORE_ID);
 
-$catalog_repository   = new CatalogRepository(Mage);
-$attribute_repository = new EavCatalogProductRepository(Mage);
-$attribute_manager    = new AttributeManager($attribute_repository);
-$magento_processor    = new ProductImporter($catalog_repository,$attribute_manager);
-$magento_processor->process(new CsvFile('sample.csv'),'sample.csv');
+$mageWrapper        = new MageWrapper(Mage);
+$eavRepository      = new EavCatalogProductRepository($mageWrapper);
+$catalogRepository  = new CatalogRepository($mageWrapper,$eavRepository);
+$magentoProcessor   = new ProductImporter($catalogRepository);
 
-// probably new usage
-// $mageWrapper        = new MageWrapper(Mage);
-// $eavRepository      = new EavCatalogProductRepository($mageWrapper);
-// $catalogRepository  = new CatalogRepository($mageWrapper,$eavRepository);
-// $magentoProcessor   = new ProductImporter($catalogRepository);
-
-// $magento_processor->process(new CsvFile($argv[1]),basename($argv[1]));
+$magentoProcessor->process(new CsvFile('sample.csv'),'sample.csv');
 
 });
+
+$app->get('/test_splitter/', function () use ($app,$config){
+
+$splitter = new CsvSplitter(new CsvFile('sample.csv'),$config['output_csv_path']);
+$splitter->setCsvHandler(new CsvHandler);
+$splitter->setFileHandler(new Filesystem);
+$splitter->split(5);
+
+});
+
 $app->run();
 
 

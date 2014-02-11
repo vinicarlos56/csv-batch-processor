@@ -61,6 +61,7 @@ class EavCatalogProductRepositoryTest extends PHPUnit_Framework_TestCase
             ->will($this->returnValue(array()));
 
         $mageMock = $this->getMockBuilder('Helpers\Magento\MageWrapper')
+            ->disableOriginalConstructor()
             ->setMethods(array('getModel'))
             ->getMock();
 
@@ -187,6 +188,7 @@ class EavCatalogProductRepositoryTest extends PHPUnit_Framework_TestCase
             ->will($this->returnValue($attributeOptionsArray));
 
         $mageMock = $this->getMockBuilder('Helpers\Magento\MageWrapper')
+            ->disableOriginalConstructor()
             ->setMethods(array('getModel'))
             ->getMock();
 

@@ -42,11 +42,13 @@ class ProductImporter implements BatchProcessorInterface
 
             if ( $product ) {
 
-                $this->catalogRepository->updateProductStock($row);
+                $this->catalogRepository->updateStock($row);
 
             } else {
 
-                $this->catalogRepository->createProduct($row);
+                $this->catalogRepository->createSimpleProduct($row);
+                $this->catalogRepository->updateStock($row);
+
             }
 
         }

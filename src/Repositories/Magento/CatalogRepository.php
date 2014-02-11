@@ -20,17 +20,6 @@ class CatalogRepository
         return $this->magentoInstance->getModel($modelName);
     }
 
-    public function updateProductStock($stockData)
-    {
-        $stockItem = $this->catalogRepository->updateStock($product,$stockData); 
-
-        $product->getOptionInstance()->unsetOptions()->clearInstance();
-        $stockItem->clearInstance();
-        $product->clearInstance();
-
-        echo "Product updated ".$stockData['sku'];
-    }
-
     public function loadAttributes($productData,$attributesArray)
     {
         foreach ($attributesArray as $attributeName) {
@@ -47,23 +36,14 @@ class CatalogRepository
         return $productData;
     }
 
-    public function createProduct($productData)
+    public function productExists($sku)
     {
-            $productData = $this->loadAttributes($productData,array('color','tamanho'));
-            
-            $product = $this->createSimpleProduct($productData);            
-            $stock   = $this->updateStock($product,$productData);            
-           
-            $product->clearInstance();
-            $product->getOptionInstance()->unsetOptions()->clearInstance();
-            $stock->clearInstance();
-
-            echo "Product Created ".$productData['sku'] ;
-
+        return (bool) $this->getModel('catalog/product')->loadByAttribute('sku',$sku);
     }
 
     public function createSimpleProduct($productData)
     {
+        //TODO: load the attributes
         $productData['type_id'] 	      = 'simple';
         $productData['visibility']        = 1; // catalog, search
         $productData['attribute_set_id']  = 4;  // default attribute set
@@ -79,13 +59,15 @@ class CatalogRepository
         return $productModel;
     }
 
-    public function updateStock($product,$stockData)
+    public function updateStock($productData)
     {
+        $product     = $this->getModel('catalog/product')->loadByAttribute('sku',$productData['sku']);  
         $stockItem   = $this->getModel('cataloginventory/stock_item')->loadByProduct($product->getId());
         $stock       = array();
 
         if ( ! $stockItem->getId() ) {
          
+           
             // TODO:check why do I need this
             $stock = array (
                 'product_id' => $product->getId(),
@@ -121,15 +103,16 @@ class CatalogRepository
             $stock = $stockItem->getData();
         }
         
-
         foreach($stock as $stockAttribute => $value) {
         
-            //TODO: check if this change works
-            if( isset($stockData[$stockAttribute]) ) {
-                $stock[$stockAttribute] = $stockData[$stockAttribute] ?: 0;
-
-                $stockItem->setData($stockAttribute,$stock[$stockAttribute]); 
+            // if the data exists in productDataArray
+            if( isset($productData[$stockAttribute]) ) {
+                // update the stockDataArray
+                $stock[$stockAttribute] = $productData[$stockAttribute] ?: 0;
             }
+            //then set the stockAttributeValue to his key
+            $stockItem->setData($stockAttribute,$stock[$stockAttribute]); 
+           
         } 
 
         $stockItem->save();

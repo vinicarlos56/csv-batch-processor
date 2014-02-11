@@ -4,7 +4,7 @@ use Processors\Magento\ProductImporter as ProductImporter;
 
 class ProductImporterTest extends PHPUnit_Framework_TestCase
 {
-    public function testProcessMethodCreatesProduct()
+    public function testProcessMethodCreatesProductAndThenUpdatesTheStock()
     {
         $sku       = 'sku';
         $fileName  = 'filename';
@@ -13,7 +13,7 @@ class ProductImporterTest extends PHPUnit_Framework_TestCase
         
         $catalogRepositoryMock = $this->getMockBuilder('Repositories\Magento\CatalogRepository')
             ->disableOriginalConstructor()
-            ->setMethods(array('productExists','updateProductStock','createProduct'))
+            ->setMethods(array('productExists','updateStock','createSimpleProduct'))
             ->getMock();
 
         $catalogRepositoryMock->expects($this->once())
@@ -22,7 +22,11 @@ class ProductImporterTest extends PHPUnit_Framework_TestCase
             ->will($this->returnValue(false));
 
         $catalogRepositoryMock->expects($this->once())
-            ->method('createProduct')
+            ->method('createSimpleProduct')
+            ->with(array_combine($csvHeader,$firstRow));
+
+        $catalogRepositoryMock->expects($this->once())
+            ->method('updateStock')
             ->with(array_combine($csvHeader,$firstRow));
 
         $csvFileMock = $this->getCsvFileMock($csvHeader,$firstRow);
@@ -48,7 +52,7 @@ class ProductImporterTest extends PHPUnit_Framework_TestCase
         
         $catalogRepositoryMock = $this->getMockBuilder('Repositories\Magento\CatalogRepository')
             ->disableOriginalConstructor()
-            ->setMethods(array('productExists','updateProductStock','createProduct'))
+            ->setMethods(array('productExists','updateStock','createSimpleProduct'))
             ->getMock();
 
         $catalogRepositoryMock->expects($this->once())
@@ -57,7 +61,7 @@ class ProductImporterTest extends PHPUnit_Framework_TestCase
             ->will($this->returnValue(true));
 
         $catalogRepositoryMock->expects($this->once())
-            ->method('updateProductStock')
+            ->method('updateStock')
             ->with(array_combine($csvHeader,$firstRow));
 
         $csvFileMock = $this->getCsvFileMock($csvHeader,$firstRow);

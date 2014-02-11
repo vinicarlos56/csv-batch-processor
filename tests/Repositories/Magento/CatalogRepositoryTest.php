@@ -38,6 +38,7 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
             ->will($this->returnValue($productStub));
 
         $mageMock = $this->getMockBuilder('Helpers\Magento\MageWrapper')
+            ->disableOriginalConstructor()
             ->setMethods(array('getModel','loadByAttribute'))
             ->getMock();
 
@@ -60,6 +61,7 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
         $attributesArray = array('color','tamanho');
 
         $mageMock = $this->getMockBuilder('Helpers\Magento\MageWrapper')
+            ->disableOriginalConstructor()
             ->getMock();
 
         $attributeManagerMock = $this->getMockBuilder('Repositories\Magento\EavCatalogProductRepository')
@@ -94,6 +96,7 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
         $attributesArray = array('color','tamanho');
 
         $mageMock = $this->getMockBuilder('Helpers\Magento\MageWrapper')
+            ->disableOriginalConstructor()
             ->getMock();
 
         $attributeManagerMock = $this->getMockBuilder('Repositories\Magento\EavCatalogProductRepository')
@@ -133,12 +136,16 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
         $productData = $this->getProductData();
 
         $productStub = $this->getMockBuilder('stdClass')
-            ->setMethods(array('getId'))
+            ->setMethods(array('getId','loadByAttribute'))
             ->getMock();
 
         $productStub->expects($this->any())
             ->method('getId')
             ->will($this->returnValue($productId));
+
+        $productStub->expects($this->once())
+            ->method('loadByAttribute')
+            ->will($this->returnValue($productStub));
 
         $stockStub = $this->getMockBuilder('stdClass')
             ->setMethods(array('getId','getData','setData','save','loadByProduct'))
@@ -156,25 +163,24 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
         $stockStub->expects($this->once())
             ->method('getData')
             ->will($this->returnValue($stockData));
-
-        $stockStub->expects($this->at(3))
-            ->method('setData')
-            ->with('qty',4);
-
-        $stockStub->expects($this->at(4))
-            ->method('setData')
-            ->with('is_in_stock',1);
-
+        
         $stockStub->expects($this->once())
             ->method('save')
             ->will($this->returnValue($stockStub));
 
         $mageMock = $this->getMockBuilder('Helpers\Magento\MageWrapper')
-            ->setMethods(array('getModel'))
+            ->disableOriginalConstructor()
+            ->setMethods(array('getModel','getId','loadByAttribute'))
             ->getMock();
 
-        $mageMock->expects($this->once())
+        $mageMock->expects($this->at(0))
             ->method('getModel')
+            ->with('catalog/product')
+            ->will($this->returnValue($productStub));
+
+        $mageMock->expects($this->at(1))
+            ->method('getModel')
+            ->with('cataloginventory/stock_item')
             ->will($this->returnValue($stockStub));
 
         $attributeManagerMock = $this->getMockBuilder('Repositories\Magento\EavCatalogProductRepository')
@@ -182,7 +188,7 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
             ->getMock();
 
         $catalogRepository = new CatalogRepository($mageMock,$attributeManagerMock);
-        $newProductData    = $catalogRepository->updateStock($productStub,$productData);
+        $newProductData    = $catalogRepository->updateStock($productData);
 
     }
 
@@ -193,12 +199,16 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
         $productData = $this->getProductData();
 
         $productStub = $this->getMockBuilder('stdClass')
-            ->setMethods(array('getId'))
+            ->setMethods(array('getId','loadByAttribute'))
             ->getMock();
 
         $productStub->expects($this->any())
             ->method('getId')
             ->will($this->returnValue($productId));
+
+        $productStub->expects($this->once())
+            ->method('loadByAttribute')
+            ->will($this->returnValue($productStub));
 
         $stockStub = $this->getMockBuilder('stdClass')
             ->setMethods(array('getId','getData','setData','save','loadByProduct'))
@@ -215,33 +225,33 @@ class CatalogRepositoryTest extends PHPUnit_Framework_TestCase
 
         $stockStub->expects($this->never())
             ->method('getData');
-
-        $stockStub->expects($this->at(2))
-            ->method('setData')
-            ->with('qty',4);
-
-        $stockStub->expects($this->at(3))
-            ->method('setData')
-            ->with('is_in_stock',1);
-
+        
         $stockStub->expects($this->once())
             ->method('save')
             ->will($this->returnValue($stockStub));
 
         $mageMock = $this->getMockBuilder('Helpers\Magento\MageWrapper')
+            ->disableOriginalConstructor()
             ->setMethods(array('getModel'))
             ->getMock();
 
-        $mageMock->expects($this->once())
+        $mageMock->expects($this->at(0))
             ->method('getModel')
+            ->with('catalog/product')
+            ->will($this->returnValue($productStub));
+
+        $mageMock->expects($this->at(1))
+            ->method('getModel')
+            ->with('cataloginventory/stock_item')
             ->will($this->returnValue($stockStub));
+
 
         $attributeManagerMock = $this->getMockBuilder('Repositories\Magento\EavCatalogProductRepository')
             ->disableOriginalConstructor()
             ->getMock();
 
         $catalogRepository = new CatalogRepository($mageMock,$attributeManagerMock);
-        $newProductData    = $catalogRepository->updateStock($productStub,$productData);
+        $newProductData    = $catalogRepository->updateStock($productData);
 
     }
 
